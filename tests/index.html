@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Modulerizer Unit Tests</title>
+  <link rel="stylesheet" href="./vendor/qunit.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture">
+	<div id="css-test"></div>
+  </div>
+  <script src="./vendor/qunit.js"></script>
+  <script src="../js/modulerizer.js"></script>
+  <script>
+	MOD.config.root = window.location.href.replace("index.html", "");
+
+	// function for retreiving the computed CSS property of an element
+	function getCssStyle(elem, property) {
+		if (elem.currentStyle) {
+			return elem.currentStyle[property];
+		}
+		return getComputedStyle(elem,'').getPropertyValue(property);
+	}
+	
+	// begin tests
+	test("test Mod.namespace", function () {
+		var mod = {};
+		MOD.namespace("test1", mod);
+		deepEqual(mod, {test1: {}}, "mod.test1 is created");
+		MOD.namespace("test2.level2", mod);
+		deepEqual(mod, {test1: {}, test2: {level2: {}}}, "mod.test2.level2 is created");
+		// reset
+		mod = {test1: null};
+		MOD.namespace("test1.test2", mod);
+		deepEqual(mod, {test1: {test2: {}}}, "mod.test1.test2 is created from null field");
+	});
+	
+	asyncTest("load single module: test1-module1", 2, function () {
+		MOD().use(["test1-module1"], function (mod) {
+			ok(true, "test1-module1 is loaded");
+			ok(mod.module1, "test1-module1 is executed");
+			start();
+		});
+	});
+	
+	asyncTest("load single module css: module1.css", 2, function () {
+		MOD().use(["test1-module1!css"], function (mod) {
+			ok(true, "module1.css is loaded");
+			equal(getCssStyle(document.getElementById("css-test"), "display"), "none", "validate css style");
+			start();
+		});
+	});
+	/*
+	asyncTest("load single module with dependency: test1-module2", 4, function () {
+		MOD().use(["test1-module2"], function (mod) {
+			ok(true, "test1-module2 is loaded");
+			ok(mod.module1, "test1-module1 is executed");
+			ok(mod.module2, "test1-module2 is executed");
+			ok(mod.module2_dependencies, "test-module1 executed before test-module2");
+			start();
+		});
+	});
+	/*
+	asyncTest("load multiple modules: test1-module1, test1-module2", 4, function () {
+		MOD().use(["test1-module1", "test1-module2"], function (mod) {
+			ok(true, "modules are loaded");
+			ok(mod.module1, "test1-module1 is executed");
+			ok(mod.module2, "test1-module2 is executed");
+			ok(mod.module2_dependencies, "test-module1 executed before test-module2");
+			start();
+		});
+	});
+	
+	asyncTest("directly load a javascript file", 1, function () {
+		MOD.Loader.load("js", MOD.config.root + "vendor/underscore.js", function () {
+			ok(true, "vendor/underscore.js is loaded");
+			start();
+		});
+	});
+	*/
+  </script>
+</body>
+</html>
