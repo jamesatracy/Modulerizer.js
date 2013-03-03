@@ -99,7 +99,7 @@ var MOD = (function (config) {
 					if (callback) {
 						callback(self);
 					}
-				};
+				}
 			});
 		}
 	};
@@ -349,6 +349,10 @@ MOD.Loader = (function () {
 			// construct final path
 			path = config.root  + path + "/" + type + "/" + src;
 		} else {
+			if (src.indexOf("!") >= 0) {
+				// strip off anything after the !
+				src = src.substr(0, src.indexOf("!"));
+			}
 			// construct final path
 			path = config.root + src;
 		}
